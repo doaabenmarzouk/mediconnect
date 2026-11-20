@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:sch="http://mediconnect.tn/soap/dossier" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://mediconnect.tn/soap/dossier" targetNamespace="http://mediconnect.tn/soap/dossier">
+  <wsdl:types>
+    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://mediconnect.tn/soap/dossier">
+
+  <!-- ===== Types simples ===== -->
+
+  <!-- Identifiant unique du patient (simulé : 8 chiffres) -->
+  <xs:simpleType name="IdentifiantPatient">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9]{8}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Code d'acte en lettre-clé (exemples : C, CS, K50) -->
+  <xs:simpleType name="CodeActe">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[A-Z]{1,3}[0-9]{0,3}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="StatutFeuille">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="EMISE"/>
+      <xs:enumeration value="REJETEE"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- ===== Types complexes ===== -->
+
+  <xs:complexType name="ActeMedical">
+    <xs:sequence>
+      <xs:element name="numeroFeuille" type="xs:string"/>
+      <xs:element name="dateActe" type="xs:date"/>
+      <xs:element name="codeActe" type="tns:CodeActe"/>
+      <xs:element name="libelle" type="xs:string"/>
+      <xs:element name="montant" type="xs:decimal"/>
+      <xs:element name="tauxRemboursement" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- ===== Opération 1 : verifierDroitsCNAM ===== -->
+
+  <xs:element name="VerifierDroitsCNAMRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="patientId" type="tns:IdentifiantPatient"/>
+        <xs:element name="codeActe" type="tns:CodeActe"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="VerifierDroitsCNAMResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="droitsOuverts" type="xs:boolean"/>
+        <!-- 80 ou 50 (0 si droits non ouverts) -->
+        <xs:element name="tauxRemboursement" type="xs:int"/>
+        <xs:element name="message" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ===== Opération 2 : emettreFeuilleDeSoins ===== -->
+
+  <xs:element name="EmettreFeuilleDeSoinsRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="patientId" type="tns:IdentifiantPatient"/>
+        <xs:element name="medecinId" type="xs:string"/>
+        <xs:element name="codeActe" type="tns:CodeActe"/>
+        <xs:element name="dateActe" type="xs:date"/>
+        <xs:element name="montant" type="xs:decimal"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="EmettreFeuilleDeSoinsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="numeroFeuille" type="xs:string"/>
+        <xs:element name="statut" type="tns:StatutFeuille"/>
+        <xs:element name="montantRembourse" type="xs:decimal"/>
+        <xs:element name="resteACharge" type="xs:decimal"/>
+        <xs:element name="dateEmission" type="xs:date"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ===== Opération 3 : consulterHistorique ===== -->
+
+  <xs:element name="ConsulterHistoriqueRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="patientId" type="tns:IdentifiantPatient"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ConsulterHistoriqueResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="patientId" type="tns:IdentifiantPatient"/>
+        <xs:element maxOccurs="unbounded" minOccurs="0" name="actes" type="tns:ActeMedical"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="EmettreFeuilleDeSoinsResponse">
+    <wsdl:part element="tns:EmettreFeuilleDeSoinsResponse" name="EmettreFeuilleDeSoinsResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="VerifierDroitsCNAMRequest">
+    <wsdl:part element="tns:VerifierDroitsCNAMRequest" name="VerifierDroitsCNAMRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="VerifierDroitsCNAMResponse">
+    <wsdl:part element="tns:VerifierDroitsCNAMResponse" name="VerifierDroitsCNAMResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="ConsulterHistoriqueRequest">
+    <wsdl:part element="tns:ConsulterHistoriqueRequest" name="ConsulterHistoriqueRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="ConsulterHistoriqueResponse">
+    <wsdl:part element="tns:ConsulterHistoriqueResponse" name="ConsulterHistoriqueResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="EmettreFeuilleDeSoinsRequest">
+    <wsdl:part element="tns:EmettreFeuilleDeSoinsRequest" name="EmettreFeuilleDeSoinsRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="DossierPort">
+    <wsdl:operation name="EmettreFeuilleDeSoins">
+      <wsdl:input message="tns:EmettreFeuilleDeSoinsRequest" name="EmettreFeuilleDeSoinsRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:EmettreFeuilleDeSoinsResponse" name="EmettreFeuilleDeSoinsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VerifierDroitsCNAM">
+      <wsdl:input message="tns:VerifierDroitsCNAMRequest" name="VerifierDroitsCNAMRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:VerifierDroitsCNAMResponse" name="VerifierDroitsCNAMResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsulterHistorique">
+      <wsdl:input message="tns:ConsulterHistoriqueRequest" name="ConsulterHistoriqueRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:ConsulterHistoriqueResponse" name="ConsulterHistoriqueResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="DossierPortSoap11" type="tns:DossierPort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="EmettreFeuilleDeSoins">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="EmettreFeuilleDeSoinsRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="EmettreFeuilleDeSoinsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VerifierDroitsCNAM">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="VerifierDroitsCNAMRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="VerifierDroitsCNAMResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsulterHistorique">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="ConsulterHistoriqueRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="ConsulterHistoriqueResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="DossierPortService">
+    <wsdl:port binding="tns:DossierPortSoap11" name="DossierPortSoap11">
+      <soap:address location="/ws"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
