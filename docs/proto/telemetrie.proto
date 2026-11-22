@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package telemetrie;
+
+// ===== Énumérations =====
+
+enum Niveau {
+  NIVEAU_INCONNU = 0;
+  AVERTISSEMENT = 1;
+  CRITIQUE = 2;
+}
+
+enum TypeAlerte {
+  TYPE_INCONNU = 0;
+  TACHYCARDIE = 1;
+  BRADYCARDIE = 2;
+  HYPOXIE = 3;
+  FIEVRE = 4;
+  HYPOTHERMIE = 5;
+}
+
+// ===== Messages =====
+
+// Une mesure envoyée par le capteur
+message Mesure {
+  string patient_id = 1;
+  int32  frequence_cardiaque = 2;   // battements par minute
+  int32  spo2 = 3;                  // saturation en oxygène, en %
+  float  temperature = 4;           // en °C
+  int64  horodatage = 5;            // millisecondes depuis 1970
+}
+
+// Une alerte levée par le serveur
+message Alerte {
+  string     alerte_id = 1;
+  string     patient_id = 2;
+  TypeAlerte type = 3;
+  Niveau     niveau = 4;
+  string     message = 5;
+  Mesure     mesure = 6;            // la mesure qui a déclenché l'alerte
+  int64      horodatage = 7;
+}
+
+message PatientRequest {
+  string patient_id = 1;
+}
+
+message AbonnementRequest {
+  string patient_id = 1;            // vide = toutes les alertes
+}
+
+// ===== Service =====
+
+service Telemetrie {
+  // Bidirectionnel : le capteur envoie des mesures, le serveur renvoie des alertes
+  rpc Surveiller (stream Mesure) returns (stream Alerte);
+
+  // Server streaming : l'orchestrateur s'abonne aux alertes
+  rpc SuivreAlertes (AbonnementRequest) returns (stream Alerte);
+
+  // Unary : dernière mesure connue d'un patient
+  rpc DerniereMesure (PatientRequest) returns (Mesure);
+}
