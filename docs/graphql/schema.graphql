@@ -1,0 +1,85 @@
+type Alerte {
+  id: ID!
+  type: String!
+  niveau: Niveau!
+  message: String!
+  horodatage: String!
+}
+
+type Constantes {
+  frequenceCardiaque: Int!
+  spo2: Int!
+  temperature: Float!
+  horodatage: String!
+}
+
+input FicheInput {
+  patientId: ID!
+  alerteDeclenchante: String!
+  medecin: String!
+  rendezVousId: Int!
+  arriveeEstimeeMinutes: Int!
+  droitsOuverts: Boolean!
+  tauxRemboursement: Int!
+}
+
+type FicheIntervention {
+  id: ID!
+  patientId: ID!
+  alerteDeclenchante: String!
+  medecin: String!
+  rendezVousId: Int!
+  arriveeEstimeeMinutes: Int!
+  droitsOuverts: Boolean!
+  tauxRemboursement: Int!
+  statut: String!
+  creeeLe: String!
+  patient: Patient
+}
+
+type Mutation {
+  creerFicheIntervention(input: FicheInput!): FicheIntervention!
+}
+
+enum Niveau {
+  AVERTISSEMENT
+  CRITIQUE
+}
+
+type Patient {
+  id: ID!
+  nom: String!
+  prenom: String!
+  age: Int!
+  service: Service!
+  pathologie: String!
+  risque: Risque!
+  constantes: Constantes
+  alertes: [Alerte!]!
+  traitements: [Traitement!]!
+}
+
+type Query {
+  sante: String!
+  patient(id: ID!): Patient
+  patients(service: Service = null, pathologie: String = null, risque: Risque = null): [Patient!]!
+  fichesIntervention(patientId: ID = null): [FicheIntervention!]!
+}
+
+enum Risque {
+  FAIBLE
+  MOYEN
+  ELEVE
+}
+
+enum Service {
+  CARDIOLOGIE
+  URGENCES
+  MEDECINE_GENERALE
+}
+
+type Traitement {
+  nom: String!
+  dosage: String!
+  duree: String!
+}
